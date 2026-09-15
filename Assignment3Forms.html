@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Validated User Information Form</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #d6c4ff;
+            color: #181818;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            margin: auto;
+        }
+        h2 {
+            color: #20204b;
+            margin-bottom: 20px;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        input[type="text"],
+        input[type="email"],
+        input[type="date"],
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            box-sizing: border-box;
+        }
+        textarea {
+            resize: vertical;
+            height: 100px;
+        }
+        .error {
+            color: #e74c3c;
+            font-size: 0.85em;
+            margin-top: 3px;
+            display: block;
+        }
+        button {
+            background-color: #7548a8;
+            color: white;
+            padding: 12px 20px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 1em;
+            width: 100%;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #confirm-section {
+            display: none;
+        }
+        .summary-box {
+            background: #ecf0f1;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+        }
+        .summary-box p {
+            margin: 8px 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <!-- Inputs -->
+    <form id="userForm" action="mailto:your-email@example.com" method="POST" enctype="text/plain">
+        <h2>Contact & Information Form</h2>
+        
+        <div class="form-group">
+            <label for="firstname">First Name:</label>
+            <input type="text" id="firstname" name="firstname">
+            <span class="error" id="err-firstname"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="lastname">Last Name:</label>
+            <input type="text" id="lastname" name="lastname">
+            <span class="error" id="err-lastname"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="address">Street Address:</label>
+            <input type="text" id="address" name="address">
+            <span class="error" id="err-address"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="city">City:</label>
+            <input type="text" id="city" name="city">
+            <span class="error" id="err-city"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="state">State (e.g., FL):</label>
+            <input type="text" id="state" name="state" maxlength="2">
+            <span class="error" id="err-state"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="zip">Zip Code (5 digits):</label>
+            <input type="text" id="zip" name="zip" maxlength="5">
+            <span class="error" id="err-zip"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="phone">Phone Number Format: (000)000-0000</label>
+            <input type="text" id="phone" name="phone" placeholder="(123)456-7890">
+            <span class="error" id="err-phone"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="email">Email Address:</label>
+            <input type="email" id="email" name="email">
+            <span class="error" id="err-email"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="birthdate">Birth Date:</label>
+            <input type="date" id="birthdate" name="birthdate">
+            <span class="error" id="err-birthdate"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="message">Message:</label>
+            <textarea id="message" name="message"></textarea>
+            <span class="error" id="err-message"></span>
+        </div>
+
+        <div class="form-group">
+            <label for="confirm">Security Question: What is 2 + 2?</label>
+            <input type="text" id="confirm" name="confirm">
+            <span class="error" id="err-confirm"></span>
+        </div>
+
+        <button type="button" onclick="validateAndReview()">Review Information</button>
+    </form>
+
+    <!-- Confirmation Page Section -->
+    <div id="confirm-section">
+        <h2>Confirm Your Information</h2>
+        <p>Please check your details below. If correct, click final submit to open your email client.</p>
+        <div class="summary-box" id="summary-content"></div>
+        <button type="button" onclick="finalSubmit()">Confirm and Send Email</button>
+        <br><br>
+        <button type="button" style="background-color: #e74c3c;" onclick="editForm()">Go Back and Edit</button>
+    </div>
+</div>
+
+<script>
+function clearErrors() {
+    const errors = document.querySelectorAll('.error');
+    errors.forEach(e => e.textContent = '');
+}
+
+function validateAndReview() {
+    clearErrors();
+    let isValid = true;
+
+    const fn = document.getElementById('firstname').value.trim();
+    const ln = document.getElementById('lastname').value.trim();
+    const addr = document.getElementById('address').value.trim();
+    const city = document.getElementById('city').value.trim();
+    const state = document.getElementById('state').value.trim();
+    const zip = document.getElementById('zip').value.trim();
+    const phone = document.getElementById('phone').value.trim();
+    const email = document.getElementById('email').value.trim();
+    const bdayStr = document.getElementById('birthdate').value;
+    const msg = document.getElementById('message').value.trim();
+    const captcha = document.getElementById('confirm').value.trim();
+
+    if (!fn) { document.getElementById('err-firstname').textContent = 'First name is required.'; isValid = false; }
+    if (!ln) { document.getElementById('err-lastname').textContent = 'Last name is required.'; isValid = false; }
+    if (!addr) { document.getElementById('err-address').textContent = 'Address is required.'; isValid = false; }
+    if (!city) { document.getElementById('err-city').textContent = 'City is required.'; isValid = false; }
+    
+    if (!/^[A-Za-z]{2}$/.test(state)) {
+        document.getElementById('err-state').textContent = 'Enter a valid 2-letter state abbreviation.'; isValid = false;
+    }
+    if (!/^\d{5}$/.test(zip)) {
+        document.getElementById('err-zip').textContent = 'Enter a valid 5-digit zip code.'; isValid = false;
+    }
+
+    const phoneRegex = /^\(\d{3}\)\d{3}-\d{4}$/;
+    if (!phoneRegex.test(phone)) {
+        document.getElementById('err-phone').textContent = 'Phone must match format (000)000-0000.'; isValid = false;
+    }
+
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+        document.getElementById('err-email').textContent = 'Enter a valid email address.'; isValid = false;
+    }
+
+    if (!bdayStr) {
+        document.getElementById('err-birthdate').textContent = 'Birth date is required.'; isValid = false;
+    } else {
+        const bdayDate = new Date(bdayStr);
+        const today = new Date();
+        if (bdayDate > today) {
+            document.getElementById('err-birthdate').textContent = 'Warning: Birth date cannot be in the future.'; isValid = false;
+        }
+    }
+
+    if (!msg) { document.getElementById('err-message').textContent = 'Message cannot be blank.'; isValid = false; }
+
+    if (captcha !== '4') {
+        document.getElementById('err-confirm').textContent = 'Incorrect answer to the security question.'; isValid = false;
+    }
+
+    if (isValid) {
+        // Build summary content
+        const summaryHtml = `
+            <p><strong>Name:</strong> ${fn} ${ln}</p>
+            <p><strong>Address:</strong> ${addr}, ${city}, ${state} ${zip}</p>
+            <p><strong>Phone:</strong> ${phone}</p>
+            <p><strong>Email:</strong> ${email}</p>
+            <p><strong>Birth Date:</strong> ${bdayStr}</p>
+            <p><strong>Message:</strong> ${msg}</p>
+        `;
+        document.getElementById('summary-content').innerHTML = summaryHtml;
+        document.getElementById('userForm').style.display = 'none';
+        document.getElementById('confirm-section').style.display = 'block';
+    }
+}
+
+function editForm() {
+    document.getElementById('confirm-section').style.display = 'none';
+    document.getElementById('userForm').style.display = 'block';
+}
+
+function finalSubmit() {
+    document.getElementById('userForm').submit();
+}
+</script>
+
+</body>
+</html>
