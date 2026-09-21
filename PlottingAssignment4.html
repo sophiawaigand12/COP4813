@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title> Calculator & Plotter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #e9c8ff;
+            color: #333;
+        }
+        .container {
+            max-width: 700px;
+            background: rgb(248, 237, 255);
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            margin: 0 auto;
+        }
+        h2 { text-align: center; color: #2c3e50; }
+        .input-group {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        label { font-weight: bold; font-size: 0.9em; }
+        input[type="number"] {
+            width: 100%;
+            padding: 8px;
+            margin-top: 5px;
+            box-sizing: border-box;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 12px;
+            background-color: #6e2e8b;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        button:hover { background-color: #63297e; }
+        canvas {
+            border: 1px solid #ddd;
+            margin-top: 20px;
+            background-color: #fff;
+            display: block;
+        }
+        #output {
+            margin-top: 15px;
+            padding: 10px;
+            background: #eef2f7;
+            border-left: 5px solid #6e4486;
+            font-family: monospace;
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Damped Harmonic Oscillator Plotter</h2>
+    <p style="font-size: 0.85em; color: #666; text-align: center;">
+        Equation: <i>y = A * e^(-γx) * cos(ωx + φ)</i>
+    </p>
+    
+    <div class="input-group">
+        <div>
+            <label for="amplitude">Amplitude (A):</label>
+            <input type="number" id="amplitude" value="1" step="0.1">
+        </div>
+        <div>
+            <label for="damping">Damping factor (γ):</label>
+            <input type="number" id="damping" value="0.2" step="0.05">
+        </div>
+        <div>
+            <label for="frequency">Frequency (ω):</label>
+            <input type="number" id="frequency" value="3" step="0.5">
+        </div>
+        <div>
+            <label for="phase">Phase Shift (φ):</label>
+            <input type="number" id="phase" value="0" step="0.1">
+        </div>
+        <div>
+            <label for="xMin">X Min (Start Time):</label>
+            <input type="number" id="xMin" value="0" step="1">
+        </div>
+        <div>
+            <label for="xMax">X Max (End Time):</label>
+            <input type="number" id="xMax" value="20" step="1">
+        </div>
+    </div>
+
+    <button onclick="calculateAndPlot()">Calculate & Plot</button>
+
+    <canvas id="plotCanvas" width="660" height="350"></canvas>
+    
+    <div id="output">Click "Calculate & Plot" to see specific values.</div>
+</div>
+
+<script>
+function calculateAndPlot() {
+    //  input values
+    const A = parseFloat(document.getElementById('amplitude').value);
+    const gamma = parseFloat(document.getElementById('damping').value);
+    const omega = parseFloat(document.getElementById('frequency').value);
+    const phi = parseFloat(document.getElementById('phase').value);
+    const xMin = parseFloat(document.getElementById('xMin').value);
+    const xMax = parseFloat(document.getElementById('xMax').value);
+
+    if (xMin >= xMax) {
+        alert("X Min must be less than X Max");
+        return;
+    }
+
+    //  Generate data points
+    const points = [];
+    const steps = 200; // Resolution of graph
+    const dx = (xMax - xMin) / steps;
+    
+    let yMaxVal = -Infinity;
+    let yMinVal = Infinity;
+
+    for (let i = 0; i <= steps; i++) {
+        let x = xMin + i * dx;
+        // The Damped Oscillator Equation
+        let y = A * Math.exp(-gamma * x) * Math.cos(omega * x + phi);
+        
+        points.push({x: x, y: y});
+        
+        if (y > yMaxVal) yMaxVal = y;
+        if (y < yMinVal) yMinVal = y;
+    }
+
+    // keep plot framed
+    const yPadding = (yMaxVal - yMinVal) * 0.1 || 0.5;
+    const yMax = yMaxVal + yPadding;
+    const yMin = yMinVal - yPadding;
+
+    // Print a quick text overview 
+    document.getElementById('output').innerText = 
+        `Calculation Report:\n` +
+        `-------------------\n` +
+        `Initial Position y(${xMin}): ${points[0].y.toFixed(4)}\n` +
+        `Final Position y(${xMax}): ${points[points.length - 1].y.toFixed(4)}\n` +
+        `Peak Maximum Y in range: ${yMaxVal.toFixed(4)}\n` +
+        `Peak Minimum Y in range: ${yMinVal.toFixed(4)}`;
+
+    // Canvas Natively Plotting Engine
+    const canvas = document.getElementById('plotCanvas');
+    const ctx = canvas.getContext('2d');
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Padding inside canvas
+    const padding = 40;
+    const graphWidth = canvas.width - 2 * padding;
+    const graphHeight = canvas.height - 2 * padding;
+
+    //  Canvas pixel space
+    function toPixelX(x) {
+        return padding + ((x - xMin) / (xMax - xMin)) * graphWidth;
+    }
+    function toPixelY(y) {
+        return padding + graphHeight - ((y - yMin) / (yMax - yMin)) * graphHeight;
+    }
+
+    //  Gridlines and Axes
+    ctx.strokeStyle = '#e0e0e0';
+    ctx.lineWidth = 1;
+    
+    //  horizontal zero line if it exists in range
+    if (yMin < 0 && yMax > 0) {
+        ctx.beginPath();
+        ctx.strokeStyle = '#999';
+        ctx.moveTo(toPixelX(xMin), toPixelY(0));
+        ctx.lineTo(toPixelX(xMax), toPixelY(0));
+        ctx.stroke();
+    }
+
+    //  curve line
+    ctx.beginPath();
+    ctx.strokeStyle = '#e74c3c'; // red curve line
+    ctx.lineWidth = 2.5;
+    
+    ctx.moveTo(toPixelX(points[0].x), toPixelY(points[0].y));
+    for (let i = 1; i < points.length; i++) {
+        ctx.lineTo(toPixelX(points[i].x), toPixelY(points[i].y));
+    }
+    ctx.stroke();
+
+    // labels and bounding box
+    ctx.fillStyle = '#333';
+    ctx.font = '12px Arial';
+    
+    // X 
+    ctx.fillText(xMin.toFixed(1), padding, canvas.height - padding + 15);
+    ctx.fillText(xMax.toFixed(1), canvas.width - padding - 20, canvas.height - padding + 15);
+    ctx.fillText("Time (X)", canvas.width / 2 - 20, canvas.height - 10);
+
+    // Y 
+    ctx.fillText(yMax.toFixed(1), 5, padding + 5);
+    ctx.fillText(yMin.toFixed(1), 5, canvas.height - padding);
+    
+    // Rotate for Y-axis 
+    ctx.save();
+    ctx.translate(15, canvas.height / 2);
+    ctx.rotate(-Math.PI / 2);
+    ctx.fillText("Displacement (Y)", -40, 0);
+    ctx.restore();
+}
+
+//  default calculation 
+window.onload = calculateAndPlot;
+</script>
+
+</body>
+</html>
