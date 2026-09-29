@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Spirograph Assignment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            background-color: #ead7ff;
+            margin-top: 20px;
+        }
+        canvas {
+            background-color: #ffffff;
+            border: 2px solid #333;
+            box-shadow: 0px 0px 10px rgba(0,0,0,0.1);
+        }
+        .controls {
+            margin: 15px;
+        }
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Canvas Spirograph</h1>
+    
+    <div class="controls">
+        <button id="startBtn">Start Spirograph</button>
+    </div>
+
+    <canvas id="spiroCanvas" width="600" height="600"></canvas>
+
+    <script>
+        const canvas = document.getElementById('spiroCanvas');
+        const ctx = canvas.getContext('2d');
+        
+        let R, r, O, t, animId;
+        let prevX, prevY;
+
+        // Initialize variables and center the drawing coordinates
+        function initValues() {
+            // Random values 
+            R = Math.floor(Math.random() * 50) + 100; // radius between 100 and 150
+            r = Math.floor(Math.random() * (R - 20)) + 10; // radius less than R
+            O = Math.floor(Math.random() * 60) + 10;  // pen position
+            t = 0;
+
+            // Clear canvas and reset transform 
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.save();
+            ctx.translate(canvas.width / 2, canvas.height / 2);
+        }
+
+        // Get random color 
+        function newColor() {
+            const color = '#' + Math.floor(Math.random() * 16777215).toString(16);
+            ctx.strokeStyle = color;
+        }
+
+        // Calculate position 
+        function getPosition(angle) {
+            let x = (R + r) * Math.cos(angle) - (r + O) * Math.cos(((R + r) / r) * angle);
+            let y = (R + r) * Math.sin(angle) - (r + O) * Math.sin(((R + r) / r) * angle);
+            return { x: x, y: y };
+        }
+
+        // Animation 
+        function drawStep() {
+            // Increase 
+            t += 0.05;
+
+            // Calc
+            let pos = getPosition(t);
+
+            // Draw line 
+            ctx.beginPath();
+            ctx.moveTo(prevX, prevY);
+            ctx.lineTo(pos.x, pos.y);
+            newColor();
+            ctx.lineWidth = 1.5;
+            ctx.stroke();
+
+            // Update 
+            prevX = pos.x;
+            prevY = pos.y;
+
+            // Stop automatically after a full cycle 
+            if (t < 100) {
+                animId = requestAnimationFrame(drawStep);
+            }
+        }
+
+        // Start 
+        document.getElementById('startBtn').addEventListener('click', function() {
+            if (animId) {
+                cancelAnimationFrame(animId);
+            }
+            initValues();
+            
+            // Set starting
+            let startPos = getPosition(t);
+            prevX = startPos.x;
+            prevY = startPos.y;
+
+            drawStep();
+        });
+    </script>
+</body>
+</html>
