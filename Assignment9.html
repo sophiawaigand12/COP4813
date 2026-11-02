@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS Canvas Animation - Bouncing Object</title>
+    <style>
+        body {
+            background-color: #edd2ff;
+            font-family: Arial, sans-serif;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        canvas {
+            background-color: #ffffff;
+            border: 4px solid #333333;
+            box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.1);
+            cursor: pointer;
+        }
+        p {
+            color: #666;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Interactive Canvas Animation</h1>
+    <!-- Bounded Area: Canvas component acting as the square/rectangle box -->
+    <canvas id="animationCanvas" width="600" height="400"></canvas>
+    <p>Click inside the canvas or directly on the object to interact with it!</p>
+
+    <script>
+        // Setup Canvas and Context
+        const canvas = document.getElementById("animationCanvas");
+        const ctx = canvas.getContext("2d");
+
+        // Object Properties
+        let obj = {
+            x: 50,              // Starting x-coordinate
+            y: 50,              // Starting y-coordinate
+            radius: 20,         // Radius of the circle
+            dx: 4,              // Horizontal velocity (speed & direction)
+            dy: 3,              // Vertical velocity (speed & direction - different values = non-45 deg angle)
+            color: "#3498db"    // Initial color (blue)
+        };
+
+        // Click Effect Tracker
+        let isExpanding = false;
+        let originalRadius = obj.radius;
+
+        // --- PART 1: The Bouncing Animation (Timer-based using requestAnimationFrame) ---
+        function animate() {
+            // 1. Clear the canvas for the new frame
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // 2. Draw the object
+            ctx.beginPath();
+            ctx.arc(obj.x, obj.y, obj.radius, 0, Math.PI * 2);
+            ctx.fillStyle = obj.color;
+            ctx.fill();
+            ctx.closePath();
+
+            // 3. Update Position (Incrementing x and y locations)
+            obj.x += obj.dx;
+            obj.y += obj.dy;
+
+            // 4. Boundary Collision Detection (Simulating a Bounce)
+            // Left or Right wall collision
+            if (obj.x + obj.radius > canvas.width || obj.x - obj.radius < 0) {
+                obj.dx = -obj.dx; // Reverse horizontal direction
+            }
+            // Top or Bottom wall collision
+            if (obj.y + obj.radius > canvas.height || obj.y - obj.radius < 0) {
+                obj.dy = -obj.dy; // Reverse vertical direction
+            }
+
+            // 5. Handle Click Effect Animation State (Expanding and shrinking back)
+            if (isExpanding) {
+                obj.radius += 2;
+                if (obj.radius >= originalRadius * 2) {
+                    isExpanding = false; // Stop expanding, start shrinking
+                }
+            } else if (obj.radius > originalRadius) {
+                obj.radius -= 1; // Smoothly shrink back to standard size
+            }
+
+            // Loop the animation smoothly
+            requestAnimationFrame(animate);
+        }
+
+        // --- PART 2: Mouse Click Event Response ---
+        canvas.addEventListener("click", function(event) {
+            // Get mouse click coordinates relative to the canvas
+            const rect = canvas.getBoundingClientRect();
+            const mouseX = event.clientX - rect.left;
+            const mouseY = event.clientY - rect.top;
+
+            // Calculate distance between click and the center of the ball (Math math derivation)
+            const distance = Math.sqrt((mouseX - obj.x) ** 2 + (mouseY - obj.y) ** 2);
+
+            // Visible Responses to click:
+            // Trigger 1: If clicked anywhere, change to a random vibrant color
+            const randomColor = `hsl(${Math.random() * 360}, 80%, 50%)`;
+            obj.color = randomColor;
+
+            // Trigger 2: If clicked directly ON the object, reverse direction immediately and explode out
+            if (distance <= obj.radius) {
+                obj.dx = -obj.dx;
+                obj.dy = -obj.dy;
+                isExpanding = true; 
+            }
+        });
+
+        // Initialize the timer-based animation loop
+        animate();
+    </script>
+
+</body>
+</html>
