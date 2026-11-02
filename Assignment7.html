@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HTML5 Drag and Drop Cards</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #2c0c3f;
+            color: white;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            padding: 20px;
+        }
+
+        h1 {
+            margin-bottom: 10px;
+        }
+
+        #controls {
+            margin-bottom: 20px;
+        }
+
+        button {
+            padding: 10px 20px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            background-color: #be5fe4;
+            border: none;
+            border-radius: 5px;
+            color: #333;
+        }
+
+        button:hover {
+            background-color: #ca5efc;
+        }
+
+        #game-board {
+            display: flex;
+            justify-content: space-around;
+            width: 100%;
+            max-width: 800px;
+            margin-bottom: 40px;
+        }
+
+        .zone-title {
+            text-align: center;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+
+        #hand-zone, #discard-zone {
+            width: 45%;
+            min-height: 200px;
+            background-color: rgba(255, 255, 255, 0.1);
+            border: 2px dashed #ffffff;
+            border-radius: 10px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            padding: 15px;
+            box-sizing: border-box;
+            align-content: flex-start;
+            justify-content: center;
+        }
+
+        #discard-zone {
+            border-color: #ff5252;
+            background-color: rgba(255, 82, 82, 0.1);
+        }
+
+        /* Card Styling */
+        .card {
+            width: 80px;
+            height: 120px;
+            background-color: white;
+            color: black;
+            border-radius: 5px;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 8px;
+            box-sizing: border-box;
+            font-weight: bold;
+            font-size: 14px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            cursor: grab;
+            user-select: none;
+        }
+
+        .card.red {
+            color: #d32f2f;
+        }
+
+        .card.black {
+            color: #212121;
+        }
+
+        .card .bottom-right {
+            align-self: flex-end;
+            transform: rotate(180deg);
+        }
+
+        /* Event Logger Panel */
+        #event-log-panel {
+            width: 100%;
+            max-width: 800px;
+            background-color: #1e1e1e;
+            color: #4af626;
+            font-family: 'Courier New', Courier, monospace;
+            padding: 15px;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        #log-output {
+            max-height: 120px;
+            overflow-y: auto;
+            margin: 0;
+            padding-left: 20px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>Card Drag & Drop</h1>
+    <div id="controls">
+        <button id="deal-btn">Deal Hand</button>
+    </div>
+
+    <div id="game-board">
+        <div>
+            <div class="zone-title">Your Hand</div>
+            <div id="hand-zone"></div>
+        </div>
+        
+        <div>
+            <div class="zone-title">Discard Pile</div>
+            <div id="discard-zone"></div>
+        </div>
+    </div>
+
+    <div id="event-log-panel">
+        <strong>Captured Event Logs:</strong>
+        <ul id="log-output">
+            <li>System ready. Click "Deal Hand" to begin.</li>
+        </ul>
+    </div>
+
+    <script>
+        
+        const suits = [
+            { name: 'Spades', symbol: '♠', color: 'black', prefix: 'S' },
+            { name: 'Hearts', symbol: '♥', color: 'red', prefix: 'H' },
+            { name: 'Diamonds', symbol: '♦', color: 'red', prefix: 'D' },
+            { name: 'Clubs', symbol: '♣', color: 'black', prefix: 'C' }
+        ];
+        const values = ['A', '2', '3', '4', '5', '6', '7', '8', '9', '10', 'J', 'Q', 'K'];
+        
+        const dealBtn = document.getElementById('deal-btn');
+        const handZone = document.getElementById('hand-zone');
+        const discardZone = document.getElementById('discard-zone');
+        const logOutput = document.getElementById('log-output');
+
+        
+        function logEvent(message) {
+            const li = document.createElement('li');
+            const now = new Date();
+            const timeStr = now.toTimeString().split(' ')[0];
+            li.textContent = `[${timeStr}] ${message}`;
+            logOutput.appendChild(li);
+            logOutput.scrollTop = logOutput.scrollHeight; 
+        }
+
+        function generateDeck() {
+            let deck = [];
+            suits.forEach(suit => {
+                values.forEach((value, index) => {
+                    deck.push({
+                        id: `${suit.prefix}${index + 1}`, 
+                        display: `${value}${suit.symbol}`,
+                        color: suit.color
+                    });
+                });
+            });
+            return deck;
+        }
+
+        
+        dealBtn.addEventListener('click', () => {
+            handZone.innerHTML = '';
+            discardZone.innerHTML = '';
+            logEvent("Event Captured: 'click' on Deal Button. Shuffling and dealing 5 cards...");
+
+            let deck = generateDeck();
+            
+            
+            for (let i = 0; i < 5; i++) {
+                if (deck.length === 0) break;
+                
+                
+                const randomIndex = Math.floor(Math.random() * deck.length);
+                const cardData = deck.splice(randomIndex, 1)[0];
+
+                // Create the DOM element
+                const cardElement = document.createElement('div');
+                cardElement.classList.add('card', cardData.color);
+                cardElement.setAttribute('draggable', 'true');
+                cardElement.setAttribute('id', cardData.id);
+
+                // Structure 
+                cardElement.innerHTML = `
+                    <div>${cardData.display}</div>
+                    <div class="bottom-right">${cardData.display}</div>
+                `;
+
+                //Drag and Drop Listeners for the Card Element
+                cardElement.addEventListener('dragstart', (e) => {
+                    e.dataTransfer.setData('text/plain', cardElement.id);
+                    logEvent(`Drag Started: Card ID '${cardElement.id}' (${cardData.display})`);
+                });
+
+                handZone.appendChild(cardElement);
+            }
+        });
+
+        // Drag and Drop Target Logic 
+        // Necessary override event configuration
+        discardZone.addEventListener('dragover', (e) => {
+            e.preventDefault(); 
+        });
+
+        discardZone.addEventListener('drop', (e) => {
+            e.preventDefault();
+            const cardId = e.dataTransfer.getData('text/plain');
+            const draggedCard = document.getElementById(cardId);
+
+            if (draggedCard) {
+                discardZone.appendChild(draggedCard);
+                // Ensure card is no longer draggable 
+                draggedCard.setAttribute('draggable', 'false');
+                draggedCard.style.cursor = 'default';
+                
+                //requirements verification
+                logEvent(`SUCCESS Event Captured: Card '${cardId}' successfully DRAGGED to Discard Zone.`);
+            }
+        });
+    </script>
+</body>
+</html>

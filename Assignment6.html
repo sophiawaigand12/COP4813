@@ -67,29 +67,29 @@
                 </tr>
             </thead>
             <tbody id="data-rows">
-                <!-- JavaScript will inject rows here -->
+                
             </tbody>
         </table>
     </div>
 
     <script>
-        // Use Fetch API to load the external JSON file
+        // Fetch API to load the external JSON file
         fetch('sports_data.json')
             .then(response => {
                 if (!response.ok) {
                     throw new Error('Network response was not ok ' + response.statusText);
                 }
-                return response.json(); // Parse the JSON data
+                return response.json(); 
             })
             .then(data => {
-                // 1. Display Header metadata dynamically
+                
                 document.getElementById('meta-info').innerText = `${data.league} — Season: ${data.season}`;
 
-                // 2. Target the table body
+                
                 const tableBody = document.getElementById('data-rows');
                 let rowsHtml = '';
 
-                // 3. Loop through players array and build table rows
+                
                 data.players.forEach(player => {
                     rowsHtml += `
                         <tr>
@@ -101,7 +101,7 @@
                     `;
                 });
 
-                // 4. Inject rows into the DOM
+                
                 tableBody.innerHTML = rowsHtml;
             })
             .catch(error => {
