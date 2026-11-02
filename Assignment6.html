@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sports Score Dashboard</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 40px;
+            background-color: #f4f7f6;
+            color: #333;
+        }
+        h1, h2 {
+            color: hsl(271, 82%, 15%);
+        }
+        .table-container {
+            margin-top: 20px;
+            box-shadow: 0 4px 8px rgba(47, 2, 83, 0.05);
+            border-radius: 8px;
+            overflow: hidden;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background-color: #fff;
+        }
+        th, td {
+            padding: 12px 15px;
+            text-align: left;
+        }
+        th {
+            background-color: #2b0a55;
+            color: #f3dfff;
+            text-transform: uppercase;
+            font-size: 0.85rem;
+            letter-spacing: 0.5px;
+        }
+        tr:nth-child(even) {
+            background-color: #dbc7ff;
+        }
+        tr:hover {
+            background-color: #e4ccff;
+        }
+        .error-message {
+            color: #e74c3c;
+            font-weight: bold;
+            padding: 20px;
+            background: #fde8e7;
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+
+    <h1>League Standings Dashboard</h1>
+    <h2 id="meta-info">Loading season details...</h2>
+
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Player Name</th>
+                    <th>Position</th>
+                    <th>Games Played</th>
+                    <th>Points Per Game</th>
+                </tr>
+            </thead>
+            <tbody id="data-rows">
+                <!-- JavaScript will inject rows here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        // Use Fetch API to load the external JSON file
+        fetch('sports_data.json')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok ' + response.statusText);
+                }
+                return response.json(); // Parse the JSON data
+            })
+            .then(data => {
+                // 1. Display Header metadata dynamically
+                document.getElementById('meta-info').innerText = `${data.league} — Season: ${data.season}`;
+
+                // 2. Target the table body
+                const tableBody = document.getElementById('data-rows');
+                let rowsHtml = '';
+
+                // 3. Loop through players array and build table rows
+                data.players.forEach(player => {
+                    rowsHtml += `
+                        <tr>
+                            <td><strong>${player.playerName}</strong></td>
+                            <td>${player.position}</td>
+                            <td>${player.gamesPlayed}</td>
+                            <td>${player.pointsPerGame}</td>
+                        </tr>
+                    `;
+                });
+
+                // 4. Inject rows into the DOM
+                tableBody.innerHTML = rowsHtml;
+            })
+            .catch(error => {
+                console.error('Error loading JSON data:', error);
+                document.getElementById('data-rows').innerHTML = `
+                    <tr>
+                        <td colspan="4" class="error-message">Error loading data. Make sure you are running a local server.</td>
+                    </tr>
+                `;
+            });
+    </script>
+</body>
+</html>

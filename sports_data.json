@@ -1,0 +1,34 @@
+{
+  "season": "2026-2027",
+  "league": "Fantasy Basketball",
+  "players": [
+    {
+      "id": 1,
+      "playerName": "LeBron James",
+      "position": "Forward",
+      "pointsPerGame": 25.7,
+      "gamesPlayed": 68
+    },
+    {
+      "id": 2,
+      "playerName": "Stephen Curry",
+      "position": "Guard",
+      "pointsPerGame": 29.4,
+      "gamesPlayed": 71
+    },
+    {
+      "id": 3,
+      "playerName": "Giannis Antetokounmpo",
+      "position": "Forward",
+      "pointsPerGame": 31.1,
+      "gamesPlayed": 65
+    },
+    {
+      "id": 4,
+      "playerName": "Luka Dončić",
+      "position": "Guard",
+      "pointsPerGame": 32.4,
+      "gamesPlayed": 70
+    }
+  ]
+}
