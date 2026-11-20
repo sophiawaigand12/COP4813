@@ -1,0 +1,165 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Responsive Home Page</title>
+    
+    
+    <style>
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+
+        body {
+            background-color: #f4f4f9;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        header {
+            background-color: #1e293b;
+            color: white;
+            padding: 1rem 2rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        
+        .menu-toggle {
+            display: none; 
+            background: none;
+            border: none;
+            color: white;
+            font-size: 1.5rem;
+            cursor: pointer;
+        }
+
+        .nav-menu {
+            display: flex;
+            list-style: none;
+            gap: 1.5rem;
+        }
+
+        .nav-menu a {
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            transition: color 0.3s;
+        }
+
+        .nav-menu a:hover {
+            color: #38bdf8;
+        }
+
+       
+        main {
+            padding: 2rem;
+            max-width: 800px;
+            margin: 0 auto;
+            text-align: center;
+        }
+
+        .hero-image {
+            max-width: 100%; 
+            height: auto;
+            border-radius: 8px;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+        }
+
+        
+        @media (max-width: 768px) {
+            header {
+                flex-direction: column;
+                align-items: flex-start;
+                position: relative;
+            }
+
+            /* Show the menu toggle button for mobile */
+            .menu-toggle {
+                display: block;
+                position: absolute;
+                right: 2rem;
+                top: 1rem;
+            }
+
+            
+            .nav-menu {
+                display: none; 
+                flex-direction: column;
+                width: 100%;
+                margin-top: 1rem;
+                gap: 0;
+                border-top: 1px solid #334155;
+            }
+
+            
+            .nav-menu.active {
+                display: flex;
+            }
+
+            /* Optimization for Mobile */
+            .nav-menu li {
+                width: 100%;
+            }
+
+            .nav-menu a {
+                display: block;
+                padding: 0.8rem 0; 
+                width: 100%;
+                border-bottom: 1px solid #334155;
+            }
+            
+            .menu-toggle {
+                min-height: 48px; /* Lighthouse requirement */
+                min-width: 48px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    
+    <header>
+        <div class="logo">MyWebsite</div>
+        
+        
+        <button class="menu-toggle" aria-label="Toggle Menu">☰</button>
+        
+        
+        <ul class="nav-menu">
+            <li><a href="#">Home</a></li>
+            <li><a href="#">About</a></li>
+            <li><a href="#">Features</a></li>
+            <li><a href="#">Contact</a></li>
+        </ul>
+    </header>
+
+    
+    <main>
+        <h1>Welcome to My Responsive Page</h1>
+        <p>This page handles desktop and mobile screens.</p>
+        
+       
+        <img class="hero-image" src="https://img.magnific.com/free-psd/cat-isolated-white-background_23-2151133772.jpg?semt=ais_hybrid&w=740&q=80" alt="Placeholder responsive scenery image">
+    </main>
+
+    
+    <script>
+        const menuButton = document.querySelector('.menu-toggle');
+        const navMenu = document.querySelector('.nav-menu');
+
+        // Handles touch events 
+        menuButton.addEventListener('click', () => {
+            navMenu.classList.toggle('active');
+        });
+    </script>
+</body>
+</html>
